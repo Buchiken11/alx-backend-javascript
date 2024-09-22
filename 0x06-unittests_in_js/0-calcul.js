@@ -1,15 +1,3 @@
-function calculateNumber(a, b) {
-	try {
-		const roundedA = Math.round(a);
-		const roundedB = Math.round(b);
+const calculateNumber = (a, b) => Math.round(a) + Math.round(b);
 
-		return(roundedA + roundedB);
-	} catch(error) {
-		console.log('error occured, error');
-	};
-}
-
-const calc = calculateNumber(1.5, 2.4);
-console.log('the value is:', calc)
-
-module.exports = { calculateNumber };
+module.exports = calculateNumber;
