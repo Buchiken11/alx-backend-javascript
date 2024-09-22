@@ -1,14 +1,20 @@
-import http from 'http';
+const http = require('http');
 
-// const hostname = '127.0.0.1';
-const port = 1245;
-const app = http.createServer((req, res) => {
-  res.statusCode = 200;
+const PORT = 1245;
+const HOST = 'localhost';
+const app = http.createServer();
+
+app.on('request', (_, res) => {
+  const respo = 'Hello Holberton School!';
+
   res.setHeader('Content-Type', 'text/plain');
-  res.end('Hello Holberton School!');
+  res.setHeader('Content-Length', respo.length);
+  res.statusCode = 200;
+  res.write(Buffer.from(respo));
 });
 
-app.listen(port, () => {
-  console.log(`Server is listening on ${port}`);
+app.listen(PORT, HOST, () => {
+  process.stdout.write(`Server listening at -> http://${HOST}:${PORT}\n`);
 });
-export default app;
+
+module.exports = app;

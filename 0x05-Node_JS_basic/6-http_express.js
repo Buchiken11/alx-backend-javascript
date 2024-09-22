@@ -1,20 +1,14 @@
-import express from 'express';
+const express = require('express');
 
-// Create an instance of the express application
 const app = express();
+const PORT = 1245;
 
-// Define the route for the root URL "/"
-app.get('/', (req, res) => {
+app.get('/', (_, res) => {
   res.send('Hello Holberton School!');
 });
 
-// Export the app for testing purposes
-export default app;
+app.listen(PORT, () => {
+  console.log(`Server listening on PORT ${PORT}`);
+});
 
-// If the module is run directly, start the server
-if (require.main === module) {
-  const port = 1245;
-  app.listen(port, () => {
-    console.log(`Server is listening on port ${port}`);
-  });
-}
+module.exports = app;

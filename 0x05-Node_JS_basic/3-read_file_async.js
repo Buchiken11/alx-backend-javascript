@@ -1,56 +1,49 @@
-import { promises as fs } from 'fs'; // Import the promises API from fs
+const fs = require('fs');
 
-async function countStudents(path) {
-  try {
-    // Read the file asynchronously
-    const data = await fs.readFile(path, 'utf8');
-
-    // Split the data by new lines and filter out empty lines
-    const lines = data.split('\n').filter((line) => line.trim() !== '');
-
-    // If no valid data is found, resolve early
-    if (lines.length === 0) {
-      console.log('No data found.');
-      return;
+/**
+ * Counts the students in a CSV data file.
+ * @param {String} dataPath The path to the CSV data file.
+ * @author Bezaleel Olakunori <https://github.com/B3zaleel>
+ */
+const countStudents = (dataPath) => new Promise((resolve, reject) => {
+  fs.readFile(dataPath, 'utf-8', (err, data) => {
+    if (err) {
+      reject(new Error('Cannot load the database'));
     }
+    if (data) {
+      const fileLines = data
+        .toString('utf-8')
+        .trim()
+        .split('\n');
+      const studentGroups = {};
+      const dbFieldNames = fileLines[0].split(',');
+      const studentPropNames = dbFieldNames
+        .slice(0, dbFieldNames.length - 1);
 
-    // First line is the header, so we remove it
-    lines.shift();
-
-    // Create a map to hold field counts and lists of student names
-    const fieldCounts = {};
-
-    // Process each line in the CSV
-    lines.forEach((line) => {
-      const [firstname, , , field] = line.split(','); // Ignore unused values
-
-      // If the field isn't already in the map, initialize it
-      if (!fieldCounts[field]) {
-        fieldCounts[field] = { count: 0, students: [] };
+      for (const line of fileLines.slice(1)) {
+        const studentRecord = line.split(',');
+        const studentPropValues = studentRecord
+          .slice(0, studentRecord.length - 1);
+        const field = studentRecord[studentRecord.length - 1];
+        if (!Object.keys(studentGroups).includes(field)) {
+          studentGroups[field] = [];
+        }
+        const studentEntries = studentPropNames
+          .map((propName, idx) => [propName, studentPropValues[idx]]);
+        studentGroups[field].push(Object.fromEntries(studentEntries));
       }
 
-      // Increment the count and add the student's
-      // first name to the list
-      fieldCounts[field].count += 1;
-      fieldCounts[field].students.push(firstname);
-    });
-
-    // Log the total number of students
-    console.log(`Number of students: ${lines.length}`);
-
-    // Log the number of students in each
-    // field and the list of first names
-    for (const field in fieldCounts) {
-      if (Object.prototype.hasOwnProperty.call(fieldCounts, field)) {
-        const { count, students } = fieldCounts[field];
-        console.log(`Number of students in ${field}: ${count}. List: ${students.join(', ')}`);
+      const totalStudents = Object
+        .values(studentGroups)
+        .reduce((pre, cur) => (pre || []).length + cur.length);
+      console.log(`Number of students: ${totalStudents}`);
+      for (const [field, group] of Object.entries(studentGroups)) {
+        const studentNames = group.map((student) => student.firstname).join(', ');
+        console.log(`Number of students in ${field}: ${group.length}. List: ${studentNames}`);
       }
+      resolve(true);
     }
-  } catch (err) {
-    // If an error occurs (like file not found)
-    // throw an error with the appropriate message
-    throw new Error('Cannot load the database');
-  }
-}
+  });
+});
 
-export default countStudents;
+module.exports = countStudents;
